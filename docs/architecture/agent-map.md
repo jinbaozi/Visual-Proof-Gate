@@ -22,6 +22,16 @@ Avoid:
 - `src/reports/`
 - `src/orchestrator/`
 
+## Change Taste handoff or Taste compliance
+
+Read:
+
+- `src/contracts/taste-handoff.ts`
+- `src/taste/`
+- `src/reports/taste-compliance-report.ts`
+
+Avoid browser probes unless the compliance finding needs new evidence.
+
 ## Change one probe
 
 Read:
@@ -31,6 +41,17 @@ Read:
 - the specific `src/probes/<probe>/` directory
 
 Avoid unrelated probes unless the failing test points there.
+
+## Change visual diagnosis or enhancement planning
+
+Read:
+
+- `src/contracts/enhancement.ts`
+- `src/diagnosis/`
+- `src/enhancers/`
+- `src/reports/enhancement-plan-report.ts`
+
+Do not edit source patching logic; v1 is diagnose-only.
 
 ## Change report output
 
@@ -42,12 +63,13 @@ Read:
 
 Do not edit Playwright probes for report-only changes.
 
-## Change Impeccable routing
+## Change Impeccable routing or handoff
 
 Read:
 
 - `src/contracts/defect.ts`
 - `src/routing/impeccable-command-router.ts`
+- `src/handoff/impeccable-handoff.ts`
 
 ## Change execution order
 

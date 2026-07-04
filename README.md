@@ -1,13 +1,27 @@
 # Visual Proof Gate
 
-Visual Proof Gate is an automation layer designed to run after **Taste Skill** and before **Impeccable Skill**. It converts a visual direction into screenshot evidence, responsive checks, content stress results, token and asset ledgers, a defect backlog, and an ordered Impeccable command route.
+Visual Proof Gate is the middle-layer automation designed to run after **Taste Skill** and before **Impeccable Skill**. Taste creates the first visual pass, Visual Proof turns that pass into evidence and enhancement planning, and Impeccable performs final design systemization, audit, correction, polish, and shipping checks.
+
+## Pipeline role
+
+```text
+Taste Skill
+  ↓ first visual generation + design intent
+Visual Proof Gate
+  ↓ evidence + diagnosis + enhancement plan + handoff
+Impeccable Skill
+  ↓ design systemization + audit + hardening + polish
+Production-ready UI
+```
+
+Visual Proof v1 is diagnose-only: it produces enhancement plans and handoff documents, but it does not automatically modify source code.
 
 ## Agent progressive disclosure
 
 The implementation is organized so agents can start with project intent and then progressively open only the layer they need:
 
 ```text
-contracts → config/intent/io/browser → probes → reports/routing → orchestrator → CI guardrails
+contracts → config/intent/taste/io/browser → probes → diagnosis/enhancers → reports/routing/handoff → orchestrator → CI guardrails
 ```
 
 Start with:
@@ -18,14 +32,21 @@ Start with:
 
 ## What it generates
 
+- `docs/visual-proof/taste-handoff.lock.md`
 - `docs/visual-proof/design-intent.lock.md`
 - `docs/visual-proof/evidence.md`
+- `docs/visual-proof/taste-compliance-report.md`
+- `docs/visual-proof/aesthetic-diagnosis.md`
+- `docs/visual-proof/visual-scorecard.json`
+- `docs/visual-proof/enhancement-plan.md`
+- `docs/visual-proof/enhancement-plan.json`
 - `docs/visual-proof/responsive-matrix.md`
 - `docs/visual-proof/token-ledger.json`
 - `docs/visual-proof/asset-ledger.md`
 - `docs/visual-proof/state-matrix.md`
 - `docs/visual-proof/content-stress-report.md`
 - `docs/visual-proof/defect-backlog.md`
+- `docs/visual-proof/impeccable-handoff.md`
 - `docs/visual-proof/impeccable-routing.md`
 
 ## Install
@@ -43,9 +64,23 @@ npm run arch:test
 npm run vp:unit
 ```
 
-## Run against an app
+## Run the middle-layer flow
 
-Edit `visual-proof.config.ts`, then run:
+After Taste Skill creates the first visual pass, edit `visual-proof.config.ts`, then run:
+
+```bash
+VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:middle
+```
+
+Equivalent focused aliases:
+
+```bash
+VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:diagnose
+VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:enhance:plan
+VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:handoff
+```
+
+## Run full checks against an app
 
 ```bash
 VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:gate
@@ -72,4 +107,5 @@ This repository includes two workflows:
 - `P0` blocks progress.
 - `P1` must be routed before final polish.
 - `P2` can be resolved during polish.
+- Visual Proof enhancement planning is diagnose-only in v1.
 - `/impeccable polish` is only recommended after targeted commands and `/impeccable audit`.

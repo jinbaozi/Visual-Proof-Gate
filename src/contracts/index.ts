@@ -4,4 +4,6 @@ export * from "./config";
 export * from "./evidence";
 export * from "./defect";
 export * from "./stage";
+export * from "./taste-handoff";
+export * from "./enhancement";
 export * from "./context";

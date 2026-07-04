@@ -9,6 +9,7 @@ export function createVisualProofContext(page: Page, config: VisualProofConfig):
   return {
     page,
     config,
+    tasteComplianceFindings: [],
     evidence: [],
     responsiveObservations: [],
     contentStressResults: [],

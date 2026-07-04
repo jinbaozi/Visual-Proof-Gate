@@ -1,6 +1,8 @@
 import type { EvidenceItem, ResponsiveObservation, TokenLedger } from "./evidence";
 import type { VisualDefect } from "./defect";
 import type { VisualProofConfig } from "./config";
+import type { TasteComplianceFinding, TasteHandoff } from "./taste-handoff";
+import type { EnhancementPlan, ImpeccableHandoff, VisualScorecard } from "./enhancement";
 
 export interface ImpeccableRoutePlan {
   status: "PASS" | "FAIL";
@@ -10,6 +12,11 @@ export interface ImpeccableRoutePlan {
 
 export interface VisualProofDataContext {
   config: VisualProofConfig;
+  tasteHandoff?: TasteHandoff;
+  tasteComplianceFindings: TasteComplianceFinding[];
+  visualScorecard?: VisualScorecard;
+  enhancementPlan?: EnhancementPlan;
+  impeccableHandoff?: ImpeccableHandoff;
   intentLock?: string;
   evidence: EvidenceItem[];
   responsiveObservations: ResponsiveObservation[];
