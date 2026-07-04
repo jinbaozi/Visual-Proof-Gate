@@ -4,3 +4,6 @@ export * from "./asset-ledger-report";
 export * from "./content-stress-report";
 export * from "./state-matrix-report";
 export * from "./defect-backlog-report";
+export * from "./taste-compliance-report";
+export * from "./visual-scorecard-report";
+export * from "./enhancement-plan-report";
