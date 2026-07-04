@@ -1,0 +1,75 @@
+name: Visual Proof Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: URL to run Visual Proof Gate against, for example https://example.com
+        required: true
+        type: string
+      run_lighthouse:
+        description: Run Lighthouse CI after Playwright gates
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  visual-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run Visual Proof browser gate
+        run: npm run vp:gate
+        env:
+          VISUAL_PROOF_BASE_URL: ${{ inputs.base_url }}
+
+      - name: Run accessibility gate
+        run: npm run vp:a11y
+        env:
+          VISUAL_PROOF_BASE_URL: ${{ inputs.base_url }}
+
+      - name: Run responsive overflow gate
+        run: npm run vp:responsive
+        env:
+          VISUAL_PROOF_BASE_URL: ${{ inputs.base_url }}
+
+      - name: Run Lighthouse CI
+        if: ${{ inputs.run_lighthouse }}
+        run: npm run vp:lhci
+        env:
+          LHCI_BASE_URL: ${{ inputs.base_url }}
+          VISUAL_PROOF_BASE_URL: ${{ inputs.base_url }}
+
+      - name: Upload visual proof docs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-proof-docs
+          path: docs/visual-proof
+          if-no-files-found: ignore
+
+      - name: Upload Playwright results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-proof-test-results
+          path: test-results
+          if-no-files-found: ignore
