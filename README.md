@@ -2,6 +2,20 @@
 
 Visual Proof Gate is an automation layer designed to run after **Taste Skill** and before **Impeccable Skill**. It converts a visual direction into screenshot evidence, responsive checks, content stress results, token and asset ledgers, a defect backlog, and an ordered Impeccable command route.
 
+## Agent progressive disclosure
+
+The implementation is organized so agents can start with project intent and then progressively open only the layer they need:
+
+```text
+contracts → config/intent/io/browser → probes → reports/routing → orchestrator → CI guardrails
+```
+
+Start with:
+
+- `docs/architecture/agent-map.md`
+- `docs/architecture/000-agent-progressive-disclosure.md`
+- `visual-proof.config.ts`
+
 ## What it generates
 
 - `docs/visual-proof/design-intent.lock.md`
@@ -25,6 +39,7 @@ npx playwright install --with-deps chromium
 
 ```bash
 npm run typecheck
+npm run arch:test
 npm run vp:unit
 ```
 
@@ -49,7 +64,7 @@ VISUAL_PROOF_BASE_URL=http://localhost:3000 LHCI_BASE_URL=http://localhost:3000 
 
 This repository includes two workflows:
 
-- `.github/workflows/ci.yml`: runs on pull requests and pushes to `main`; installs dependencies, installs Chromium, typechecks, and runs fixture/unit tests.
+- `.github/workflows/ci.yml`: runs on pull requests and pushes to `main`; installs dependencies, installs Chromium, typechecks, runs architecture tests, and runs fixture/unit tests.
 - `.github/workflows/visual-proof.yml`: manual workflow for running the full Visual Proof Gate against a deployed or local-to-CI URL supplied as `base_url`.
 
 ## Gate semantics
