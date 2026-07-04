@@ -1,16 +1,17 @@
 import type { ThemeMode, VisualProofStage } from "../contracts";
 import { VIEWPORTS } from "../contracts";
-import { gotoVisualProofRoute, applyVisualMedia, captureScreenshotEvidence } from "../browser";
+import { gotoVisualProofRoute, applyVisualMedia, captureScreenshotEvidence, captureScreenshotToPath } from "../browser";
 import { buildDesignIntentLock } from "../intent";
 import { buildTasteComplianceFindings, buildTasteHandoffFromConfig, renderTasteHandoffLock } from "../taste";
 import { buildVisualScorecard, renderAestheticDiagnosis } from "../diagnosis";
 import { buildEnhancementPlan } from "../enhancers";
 import { applySafePatchPlan, buildSafePatchPlan } from "../patches";
+import { buildAfterScreenshotPath, buildVisualDeltaReport } from "../delta";
 import { buildImpeccableHandoff, renderImpeccableHandoffReport } from "../handoff";
 import { cleanDir, writeJson, writeMarkdown } from "../io";
 import { runLayoutProbe, runResponsiveProbe, runContentStressProbe, runAssetProbe, runTokenProbe, runStateProbe } from "../probes";
 import { buildImpeccableRoutePlan, renderImpeccableRoutingMarkdown } from "../routing";
-import { renderAssetLedgerReport, renderContentStressReport, renderDefectBacklogReport, renderEvidenceReport, renderEnhancementPlanReport, renderResponsiveMatrixReport, renderSafePatchLogReport, renderSafePatchPlanReport, renderStateMatrixReport, renderTasteComplianceReport } from "../reports";
+import { renderAssetLedgerReport, renderBeforeAfterGalleryReport, renderContentStressReport, renderDefectBacklogReport, renderEvidenceReport, renderEnhancementPlanReport, renderResponsiveMatrixReport, renderSafePatchLogReport, renderSafePatchPlanReport, renderStateMatrixReport, renderTasteComplianceReport, renderVisualDeltaReport } from "../reports";
 import type { VisualProofRuntimeContext } from "./visual-proof-context";
 
 export const tasteHandoffStage: VisualProofStage<VisualProofRuntimeContext> = {
@@ -257,6 +258,41 @@ export const safePatchStage: VisualProofStage<VisualProofRuntimeContext> = {
   }
 };
 
+export const visualDeltaStage: VisualProofStage<VisualProofRuntimeContext> = {
+  name: "visual-delta",
+  description: "Captures sampled after-screenshots and builds a before/after evidence report after safe patch planning.",
+  requires: ["config", "evidence", "safePatchLog"],
+  produces: ["visualDelta", "reports"],
+  async run(context) {
+    const sampledViewports = VIEWPORTS.filter((viewport) => ["desktop-wide", "mobile-small"].includes(viewport.name));
+    const afterScreenshots: Array<{ route: string; viewport: string; theme: ThemeMode; screenshotPath: string }> = [];
+
+    if (context.safePatchLog?.entries.length) {
+      for (const route of context.config.routes) {
+        for (const viewport of sampledViewports) {
+          await context.page.setViewportSize({ width: viewport.width, height: viewport.height });
+          const theme: ThemeMode = "light";
+          await applyVisualMedia(context.page, { theme, reducedMotion: context.config.supportsReducedMotion });
+          await gotoVisualProofRoute(context.page, context.config, route);
+          const screenshotPath = buildAfterScreenshotPath({ route: route.name, viewport: viewport.name, theme });
+          await captureScreenshotToPath(context.page, screenshotPath);
+          afterScreenshots.push({ route: route.name, viewport: viewport.name, theme, screenshotPath });
+        }
+      }
+    }
+
+    context.visualDelta = buildVisualDeltaReport({
+      evidence: context.evidence,
+      afterScreenshots,
+      patchLog: context.safePatchLog,
+      sampledViewports
+    });
+    context.reports["before-after-gallery.md"] = renderBeforeAfterGalleryReport(context.visualDelta);
+    context.reports["visual-delta-report.md"] = renderVisualDeltaReport(context.visualDelta);
+    return context;
+  }
+};
+
 export const routingStage: VisualProofStage<VisualProofRuntimeContext> = {
   name: "impeccable-routing",
   description: "Converts defects into an ordered Impeccable command route plan.",
@@ -293,7 +329,7 @@ export const impeccableHandoffStage: VisualProofStage<VisualProofRuntimeContext>
 export const reportWritingStage: VisualProofStage<VisualProofRuntimeContext> = {
   name: "report-writing",
   description: "Renders and writes all Visual Proof Gate reports after probes complete.",
-  requires: ["intentLock", "tasteHandoff", "evidence", "responsiveObservations", "assetLedger", "stateMatrix", "defects", "reports", "safePatchPlan", "safePatchLog"],
+  requires: ["intentLock", "tasteHandoff", "evidence", "responsiveObservations", "assetLedger", "stateMatrix", "defects", "reports", "safePatchPlan", "safePatchLog", "visualDelta"],
   produces: ["reports"],
   async run(context) {
     context.reports["evidence.md"] = renderEvidenceReport(context.evidence);
@@ -314,6 +350,9 @@ export const reportWritingStage: VisualProofStage<VisualProofRuntimeContext> = {
     await writeMarkdown("docs/visual-proof/patch-plan.md", context.reports["patch-plan.md"] ?? "");
     await writeJson("docs/visual-proof/patch-plan.json", context.safePatchPlan ?? {});
     await writeMarkdown("docs/visual-proof/patch-log.md", context.reports["patch-log.md"] ?? "");
+    await writeMarkdown("docs/visual-proof/before-after-gallery.md", context.reports["before-after-gallery.md"] ?? "");
+    await writeMarkdown("docs/visual-proof/visual-delta-report.md", context.reports["visual-delta-report.md"] ?? "");
+    await writeJson("docs/visual-proof/visual-delta.json", context.visualDelta ?? {});
     await writeMarkdown("docs/visual-proof/responsive-matrix.md", context.reports["responsive-matrix.md"]);
     await writeMarkdown("docs/visual-proof/content-stress-report.md", context.reports["content-stress-report.md"]);
     await writeMarkdown("docs/visual-proof/asset-ledger.md", context.reports["asset-ledger.md"]);
@@ -340,6 +379,7 @@ export const VISUAL_PROOF_STAGES = [
   aestheticDiagnosisStage,
   enhancementPlanStage,
   safePatchStage,
+  visualDeltaStage,
   routingStage,
   impeccableHandoffStage,
   reportWritingStage
