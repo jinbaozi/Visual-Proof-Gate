@@ -1,0 +1,24 @@
+{
+  "name": "visual-proof-gate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Visual Proof Gate automation between Taste Skill and Impeccable Skill.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "npm run vp:unit",
+    "ci": "npm run typecheck && npm run vp:unit",
+    "vp:unit": "playwright test tests/visual-proof.unit.spec.ts --config=playwright.visual-proof.config.ts",
+    "vp:gate": "playwright test tests/visual-proof.gate.spec.ts --config=playwright.visual-proof.config.ts",
+    "vp:a11y": "playwright test tests/a11y.spec.ts --config=playwright.visual-proof.config.ts",
+    "vp:responsive": "playwright test tests/responsive.spec.ts --config=playwright.visual-proof.config.ts",
+    "vp:lhci": "lhci autorun --config=lighthouserc.cjs",
+    "vp:all": "npm run typecheck && npm run vp:gate && npm run vp:a11y && npm run vp:responsive && npm run vp:lhci"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "latest",
+    "@lhci/cli": "latest",
+    "@playwright/test": "latest",
+    "typescript": "latest"
+  }
+}
