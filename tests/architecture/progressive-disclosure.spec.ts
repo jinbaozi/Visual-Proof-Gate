@@ -50,16 +50,26 @@ test("config layer does not depend on probes, reports, routing, or orchestrator"
   await expectNoForbiddenText("src/config", ["../probes", "../reports", "../routing", "../orchestrator"]);
 });
 
+test("taste layer has no browser or orchestrator dependency", async () => {
+  await expectNoForbiddenText("src/taste", ["@playwright/test", "../browser", "../probes", "../orchestrator"]);
+});
+
 test("probes do not write reports or import higher layers", async () => {
-  await expectNoForbiddenText("src/probes", ["node:fs", "../reports", "../routing", "../orchestrator"]);
+  await expectNoForbiddenText("src/probes", ["node:fs", "../reports", "../routing", "../orchestrator", "../enhancers", "../handoff"]);
 });
 
-test("reports do not import Playwright, probes, routing, or orchestrator", async () => {
-  await expectNoForbiddenText("src/reports", ["@playwright/test", "../probes", "../routing", "../orchestrator"]);
+test("diagnosis and enhancers do not import Playwright, filesystem, probes, or orchestrator", async () => {
+  await expectNoForbiddenText("src/diagnosis", ["@playwright/test", "node:fs", "../probes", "../orchestrator"]);
+  await expectNoForbiddenText("src/enhancers", ["@playwright/test", "node:fs", "../probes", "../orchestrator"]);
 });
 
-test("routing does not import Playwright, probes, reports, or orchestrator", async () => {
+test("reports do not import Playwright, probes, routing, handoff, or orchestrator", async () => {
+  await expectNoForbiddenText("src/reports", ["@playwright/test", "../probes", "../routing", "../handoff", "../orchestrator"]);
+});
+
+test("routing and handoff do not import Playwright, probes, reports, or orchestrator", async () => {
   await expectNoForbiddenText("src/routing", ["@playwright/test", "../probes", "../reports", "../orchestrator"]);
+  await expectNoForbiddenText("src/handoff", ["@playwright/test", "../probes", "../reports", "../orchestrator"]);
 });
 
 test("orchestrator contains no DOM probe implementation details", async () => {
@@ -78,7 +88,14 @@ test("every probe directory declares its local types and probe implementation", 
 });
 
 test("visual proof stage graph exposes progressive requires and produces metadata", () => {
-  expect(VISUAL_PROOF_STAGES.length).toBeGreaterThanOrEqual(8);
+  expect(VISUAL_PROOF_STAGES.length).toBeGreaterThanOrEqual(12);
+  expect(VISUAL_PROOF_STAGES.map((stage) => stage.name)).toEqual(expect.arrayContaining([
+    "taste-handoff",
+    "taste-compliance",
+    "aesthetic-diagnosis",
+    "enhancement-plan",
+    "impeccable-handoff"
+  ]));
   for (const stage of VISUAL_PROOF_STAGES) {
     expect(stage.name).toBeTruthy();
     expect(stage.description).toBeTruthy();
