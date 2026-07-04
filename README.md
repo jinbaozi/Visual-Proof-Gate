@@ -1,6 +1,6 @@
 # Visual Proof Gate
 
-Visual Proof Gate is the middle-layer automation designed to run after **Taste Skill** and before **Impeccable Skill**. Taste creates the first visual pass, Visual Proof turns that pass into evidence and enhancement planning, and Impeccable performs final design systemization, audit, correction, polish, and shipping checks.
+Visual Proof Gate is the middle-layer automation designed to run after **Taste Skill** and before **Impeccable Skill**. Taste creates the first visual pass, Visual Proof turns that pass into evidence, enhancement planning, optional safe patching, and handoff, and Impeccable performs final design systemization, audit, correction, polish, and shipping checks.
 
 ## Pipeline role
 
@@ -8,20 +8,20 @@ Visual Proof Gate is the middle-layer automation designed to run after **Taste S
 Taste Skill
   ↓ first visual generation + design intent
 Visual Proof Gate
-  ↓ evidence + diagnosis + enhancement plan + handoff
+  ↓ evidence + diagnosis + enhancement plan + optional safe patch + handoff
 Impeccable Skill
   ↓ design systemization + audit + hardening + polish
 Production-ready UI
 ```
 
-Visual Proof v1 is diagnose-only: it produces enhancement plans and handoff documents, but it does not automatically modify source code.
+Visual Proof defaults to diagnose-only. Safe patch mode is off unless explicitly configured with `mode: "safe-patch"`, `allowAutoPatch: true`, and a `sourceRoot`.
 
 ## Agent progressive disclosure
 
 The implementation is organized so agents can start with project intent and then progressively open only the layer they need:
 
 ```text
-contracts → config/intent/taste/io/browser → probes → diagnosis/enhancers → reports/routing/handoff → orchestrator → CI guardrails
+contracts → config/intent/taste/io/browser → probes → diagnosis/enhancers/patches → reports/routing/handoff → orchestrator → CI guardrails
 ```
 
 Start with:
@@ -40,6 +40,9 @@ Start with:
 - `docs/visual-proof/visual-scorecard.json`
 - `docs/visual-proof/enhancement-plan.md`
 - `docs/visual-proof/enhancement-plan.json`
+- `docs/visual-proof/patch-plan.md`
+- `docs/visual-proof/patch-plan.json`
+- `docs/visual-proof/patch-log.md`
 - `docs/visual-proof/responsive-matrix.md`
 - `docs/visual-proof/token-ledger.json`
 - `docs/visual-proof/asset-ledger.md`
@@ -77,7 +80,31 @@ Equivalent focused aliases:
 ```bash
 VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:diagnose
 VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:enhance:plan
+VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:patch:plan
 VISUAL_PROOF_BASE_URL=http://localhost:3000 npm run vp:handoff
+```
+
+## Safe patch mode
+
+Safe patch mode is explicit and conservative:
+
+- default mode is `diagnose-only`
+- source patching requires `allowAutoPatch: true`
+- source patching requires `sourceRoot`
+- file paths are resolved inside `sourceRoot`
+- only configured file extensions are allowed
+- `replace` requires exactly one match
+- optional `requiresMarker` can force marker-gated edits
+- `dryRun` defaults to true
+
+A real patch run must opt in:
+
+```bash
+VISUAL_PROOF_BASE_URL=http://localhost:3000 \
+VISUAL_PROOF_SOURCE_ROOT=./src \
+VISUAL_PROOF_ALLOW_PATCH=true \
+VISUAL_PROOF_PATCH_DRY_RUN=false \
+npm run vp:patch:apply
 ```
 
 ## Run full checks against an app
@@ -107,5 +134,5 @@ This repository includes two workflows:
 - `P0` blocks progress.
 - `P1` must be routed before final polish.
 - `P2` can be resolved during polish.
-- Visual Proof enhancement planning is diagnose-only in v1.
+- Visual Proof enhancement planning is diagnose-only unless safe patch mode is explicitly enabled.
 - `/impeccable polish` is only recommended after targeted commands and `/impeccable audit`.
