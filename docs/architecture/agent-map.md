@@ -51,7 +51,18 @@ Read:
 - `src/enhancers/`
 - `src/reports/enhancement-plan-report.ts`
 
-Do not edit source patching logic; v1 is diagnose-only.
+Do not edit source patching logic for diagnosis-only changes.
+
+## Change safe patch mode
+
+Read:
+
+- `src/contracts/safe-patch.ts`
+- `src/patches/`
+- `src/reports/safe-patch-report.ts`
+- `visual-proof.config.ts`
+
+Safe patch changes must preserve explicit opt-in, sourceRoot boundary checks, extension allowlists, exact replacement matching, and dry-run defaults.
 
 ## Change report output
 
