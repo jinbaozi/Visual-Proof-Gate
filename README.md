@@ -1,6 +1,6 @@
 # Visual Proof Gate
 
-Visual Proof Gate is the middle-layer automation designed to run after **Taste Skill** and before **Impeccable Skill**. Taste creates the first visual pass, Visual Proof turns that pass into evidence, enhancement planning, optional safe patching, and handoff, and Impeccable performs final design systemization, audit, correction, polish, and shipping checks.
+Visual Proof Gate is the middle-layer automation designed to run after **Taste Skill** and before **Impeccable Skill**. Taste creates the first visual pass, Visual Proof turns that pass into evidence, enhancement planning, optional safe patching, visual delta evidence, and handoff, and Impeccable performs final design systemization, audit, correction, polish, and shipping checks.
 
 ## Pipeline role
 
@@ -8,7 +8,7 @@ Visual Proof Gate is the middle-layer automation designed to run after **Taste S
 Taste Skill
   ↓ first visual generation + design intent
 Visual Proof Gate
-  ↓ evidence + diagnosis + enhancement plan + optional safe patch + handoff
+  ↓ evidence + diagnosis + enhancement plan + optional safe patch + visual delta + handoff
 Impeccable Skill
   ↓ design systemization + audit + hardening + polish
 Production-ready UI
@@ -21,7 +21,7 @@ Visual Proof defaults to diagnose-only. Safe patch mode is off unless explicitly
 The implementation is organized so agents can start with project intent and then progressively open only the layer they need:
 
 ```text
-contracts → config/intent/taste/io/browser → probes → diagnosis/enhancers/patches → reports/routing/handoff → orchestrator → CI guardrails
+contracts → config/intent/taste/io/browser → probes → diagnosis/enhancers/patches/delta → reports/routing/handoff → orchestrator → CI guardrails
 ```
 
 Start with:
@@ -43,6 +43,9 @@ Start with:
 - `docs/visual-proof/patch-plan.md`
 - `docs/visual-proof/patch-plan.json`
 - `docs/visual-proof/patch-log.md`
+- `docs/visual-proof/before-after-gallery.md`
+- `docs/visual-proof/visual-delta-report.md`
+- `docs/visual-proof/visual-delta.json`
 - `docs/visual-proof/responsive-matrix.md`
 - `docs/visual-proof/token-ledger.json`
 - `docs/visual-proof/asset-ledger.md`
@@ -107,6 +110,16 @@ VISUAL_PROOF_PATCH_DRY_RUN=false \
 npm run vp:patch:apply
 ```
 
+## Visual delta
+
+After safe patch planning or application, Visual Proof samples after-screenshots and generates:
+
+- `before-after-gallery.md`
+- `visual-delta-report.md`
+- `visual-delta.json`
+
+Visual Delta v1 is evidence-oriented. It links before and after screenshots, records patch status, and intentionally avoids pixel-level pass/fail thresholds.
+
 ## Run full checks against an app
 
 ```bash
@@ -135,4 +148,5 @@ This repository includes two workflows:
 - `P1` must be routed before final polish.
 - `P2` can be resolved during polish.
 - Visual Proof enhancement planning is diagnose-only unless safe patch mode is explicitly enabled.
+- Visual Delta v1 is evidence-oriented and does not enforce pixel thresholds.
 - `/impeccable polish` is only recommended after targeted commands and `/impeccable audit`.
