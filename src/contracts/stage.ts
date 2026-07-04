@@ -1,5 +1,10 @@
 export type ContextKey =
   | "config"
+  | "tasteHandoff"
+  | "tasteComplianceFindings"
+  | "visualScorecard"
+  | "enhancementPlan"
+  | "impeccableHandoff"
   | "intentLock"
   | "evidence"
   | "responsiveObservations"
