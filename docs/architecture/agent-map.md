@@ -64,6 +64,17 @@ Read:
 
 Safe patch changes must preserve explicit opt-in, sourceRoot boundary checks, extension allowlists, exact replacement matching, and dry-run defaults.
 
+## Change visual delta
+
+Read:
+
+- `src/contracts/visual-delta.ts`
+- `src/delta/`
+- `src/reports/visual-delta-report.ts`
+- `src/orchestrator/visual-proof-stages.ts`
+
+Visual Delta v1 is evidence-oriented and must not introduce pixel-threshold failures without a separate policy change.
+
 ## Change report output
 
 Read:
