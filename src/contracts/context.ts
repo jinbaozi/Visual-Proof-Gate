@@ -1,4 +1,4 @@
-import type { AssetLedgerItem, EvidenceItem, ResponsiveObservation, StateMatrixRow, TokenLedger } from "./evidence";
+import type { EvidenceItem, ResponsiveObservation, TokenLedger } from "./evidence";
 import type { VisualDefect } from "./defect";
 import type { VisualProofConfig } from "./config";
 
@@ -14,9 +14,9 @@ export interface VisualProofDataContext {
   evidence: EvidenceItem[];
   responsiveObservations: ResponsiveObservation[];
   contentStressResults: string[];
-  assetLedger: AssetLedgerItem[];
+  assetLedger: string[][];
   tokenLedger?: TokenLedger;
-  stateMatrix: StateMatrixRow[];
+  stateMatrix: string[][];
   defects: VisualDefect[];
   reports: Record<string, string>;
   routing?: ImpeccableRoutePlan;
