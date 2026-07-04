@@ -7,3 +7,4 @@ export * from "./defect-backlog-report";
 export * from "./taste-compliance-report";
 export * from "./visual-scorecard-report";
 export * from "./enhancement-plan-report";
+export * from "./safe-patch-report";
