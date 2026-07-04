@@ -89,8 +89,6 @@ test("visual proof stage graph exposes progressive requires and produces metadat
 });
 
 test("agent map and architecture overview exist", async () => {
-  await expect(async () => {
-    await fs.access("docs/architecture/agent-map.md");
-    await fs.access("docs/architecture/000-agent-progressive-disclosure.md");
-  }).not.toThrow();
+  await fs.access("docs/architecture/agent-map.md");
+  await fs.access("docs/architecture/000-agent-progressive-disclosure.md");
 });
