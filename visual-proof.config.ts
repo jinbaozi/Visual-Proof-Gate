@@ -1,4 +1,4 @@
-import type { VisualProofConfig } from "./src/visual-proof";
+import type { VisualProofConfig } from "./src/index";
 
 const config: VisualProofConfig = {
   baseUrl: process.env.VISUAL_PROOF_BASE_URL ?? "http://127.0.0.1:3000",
