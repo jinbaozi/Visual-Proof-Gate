@@ -29,7 +29,10 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Run Visual Proof unit tests
+      - name: Architecture tests
+        run: npm run arch:test
+
+      - name: Unit tests
         run: npm run vp:unit
 
       - name: Upload Playwright results
