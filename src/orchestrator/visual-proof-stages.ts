@@ -5,11 +5,12 @@ import { buildDesignIntentLock } from "../intent";
 import { buildTasteComplianceFindings, buildTasteHandoffFromConfig, renderTasteHandoffLock } from "../taste";
 import { buildVisualScorecard, renderAestheticDiagnosis } from "../diagnosis";
 import { buildEnhancementPlan } from "../enhancers";
+import { applySafePatchPlan, buildSafePatchPlan } from "../patches";
 import { buildImpeccableHandoff, renderImpeccableHandoffReport } from "../handoff";
 import { cleanDir, writeJson, writeMarkdown } from "../io";
 import { runLayoutProbe, runResponsiveProbe, runContentStressProbe, runAssetProbe, runTokenProbe, runStateProbe } from "../probes";
 import { buildImpeccableRoutePlan, renderImpeccableRoutingMarkdown } from "../routing";
-import { renderAssetLedgerReport, renderContentStressReport, renderDefectBacklogReport, renderEvidenceReport, renderEnhancementPlanReport, renderResponsiveMatrixReport, renderStateMatrixReport, renderTasteComplianceReport } from "../reports";
+import { renderAssetLedgerReport, renderContentStressReport, renderDefectBacklogReport, renderEvidenceReport, renderEnhancementPlanReport, renderResponsiveMatrixReport, renderSafePatchLogReport, renderSafePatchPlanReport, renderStateMatrixReport, renderTasteComplianceReport } from "../reports";
 import type { VisualProofRuntimeContext } from "./visual-proof-context";
 
 export const tasteHandoffStage: VisualProofStage<VisualProofRuntimeContext> = {
@@ -239,6 +240,23 @@ export const enhancementPlanStage: VisualProofStage<VisualProofRuntimeContext> =
   }
 };
 
+export const safePatchStage: VisualProofStage<VisualProofRuntimeContext> = {
+  name: "safe-patch",
+  description: "Builds and optionally applies explicitly configured low-risk safe patches.",
+  requires: ["config", "enhancementPlan"],
+  produces: ["safePatchPlan", "safePatchLog", "reports"],
+  async run(context) {
+    context.safePatchPlan = buildSafePatchPlan({
+      config: context.config.safePatch,
+      enhancementPlan: context.enhancementPlan
+    });
+    context.safePatchLog = await applySafePatchPlan(context.safePatchPlan);
+    context.reports["patch-plan.md"] = renderSafePatchPlanReport(context.safePatchPlan);
+    context.reports["patch-log.md"] = renderSafePatchLogReport(context.safePatchLog);
+    return context;
+  }
+};
+
 export const routingStage: VisualProofStage<VisualProofRuntimeContext> = {
   name: "impeccable-routing",
   description: "Converts defects into an ordered Impeccable command route plan.",
@@ -275,7 +293,7 @@ export const impeccableHandoffStage: VisualProofStage<VisualProofRuntimeContext>
 export const reportWritingStage: VisualProofStage<VisualProofRuntimeContext> = {
   name: "report-writing",
   description: "Renders and writes all Visual Proof Gate reports after probes complete.",
-  requires: ["intentLock", "tasteHandoff", "evidence", "responsiveObservations", "assetLedger", "stateMatrix", "defects", "reports"],
+  requires: ["intentLock", "tasteHandoff", "evidence", "responsiveObservations", "assetLedger", "stateMatrix", "defects", "reports", "safePatchPlan", "safePatchLog"],
   produces: ["reports"],
   async run(context) {
     context.reports["evidence.md"] = renderEvidenceReport(context.evidence);
@@ -293,6 +311,9 @@ export const reportWritingStage: VisualProofStage<VisualProofRuntimeContext> = {
     await writeJson("docs/visual-proof/visual-scorecard.json", context.visualScorecard ?? {});
     await writeMarkdown("docs/visual-proof/enhancement-plan.md", context.reports["enhancement-plan.md"] ?? "");
     await writeJson("docs/visual-proof/enhancement-plan.json", context.enhancementPlan ?? {});
+    await writeMarkdown("docs/visual-proof/patch-plan.md", context.reports["patch-plan.md"] ?? "");
+    await writeJson("docs/visual-proof/patch-plan.json", context.safePatchPlan ?? {});
+    await writeMarkdown("docs/visual-proof/patch-log.md", context.reports["patch-log.md"] ?? "");
     await writeMarkdown("docs/visual-proof/responsive-matrix.md", context.reports["responsive-matrix.md"]);
     await writeMarkdown("docs/visual-proof/content-stress-report.md", context.reports["content-stress-report.md"]);
     await writeMarkdown("docs/visual-proof/asset-ledger.md", context.reports["asset-ledger.md"]);
@@ -318,6 +339,7 @@ export const VISUAL_PROOF_STAGES = [
   tasteComplianceStage,
   aestheticDiagnosisStage,
   enhancementPlanStage,
+  safePatchStage,
   routingStage,
   impeccableHandoffStage,
   reportWritingStage

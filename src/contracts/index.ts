@@ -6,4 +6,5 @@ export * from "./defect";
 export * from "./stage";
 export * from "./taste-handoff";
 export * from "./enhancement";
+export * from "./safe-patch";
 export * from "./context";

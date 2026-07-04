@@ -1,3 +1,5 @@
+import type { SafePatchConfig } from "./safe-patch";
+
 export interface SectionConfig {
   name: string;
   selector: string;
@@ -48,4 +50,5 @@ export interface VisualProofConfig {
   allowClippingSelectors: string[];
   tasteIntent: TasteIntent;
   routes: RouteConfig[];
+  safePatch?: SafePatchConfig;
 }

@@ -12,6 +12,9 @@ Required outputs:
 - `visual-scorecard.json`
 - `enhancement-plan.md`
 - `enhancement-plan.json`
+- `patch-plan.md`
+- `patch-plan.json`
+- `patch-log.md`
 - `responsive-matrix.md`
 - `token-ledger.json`
 - `asset-ledger.md`
@@ -23,4 +26,4 @@ Required outputs:
 
 The `screenshots/` directory stores viewport, theme, and state evidence.
 
-Visual Proof v1 is diagnose-only: it plans middle-layer enhancements and prepares Impeccable handoff, but it does not automatically patch source code.
+Visual Proof defaults to diagnose-only. Safe Patch Mode produces a patch plan and log on every gate run, but it only modifies source files when explicitly configured with `mode: safe-patch`, `allowAutoPatch: true`, and `sourceRoot`.

@@ -55,21 +55,25 @@ test("taste layer has no browser or orchestrator dependency", async () => {
 });
 
 test("probes do not write reports or import higher layers", async () => {
-  await expectNoForbiddenText("src/probes", ["node:fs", "../reports", "../routing", "../orchestrator", "../enhancers", "../handoff"]);
+  await expectNoForbiddenText("src/probes", ["node:fs", "../reports", "../routing", "../orchestrator", "../enhancers", "../handoff", "../patches"]);
 });
 
-test("diagnosis and enhancers do not import Playwright, filesystem, probes, or orchestrator", async () => {
-  await expectNoForbiddenText("src/diagnosis", ["@playwright/test", "node:fs", "../probes", "../orchestrator"]);
-  await expectNoForbiddenText("src/enhancers", ["@playwright/test", "node:fs", "../probes", "../orchestrator"]);
+test("diagnosis and enhancers do not import Playwright, filesystem, probes, patches, or orchestrator", async () => {
+  await expectNoForbiddenText("src/diagnosis", ["@playwright/test", "node:fs", "../probes", "../patches", "../orchestrator"]);
+  await expectNoForbiddenText("src/enhancers", ["@playwright/test", "node:fs", "../probes", "../patches", "../orchestrator"]);
+});
+
+test("patches do not import Playwright, browser, probes, reports, routing, handoff, or orchestrator", async () => {
+  await expectNoForbiddenText("src/patches", ["@playwright/test", "../browser", "../probes", "../reports", "../routing", "../handoff", "../orchestrator"]);
 });
 
 test("reports do not import Playwright, probes, routing, handoff, or orchestrator", async () => {
   await expectNoForbiddenText("src/reports", ["@playwright/test", "../probes", "../routing", "../handoff", "../orchestrator"]);
 });
 
-test("routing and handoff do not import Playwright, probes, reports, or orchestrator", async () => {
-  await expectNoForbiddenText("src/routing", ["@playwright/test", "../probes", "../reports", "../orchestrator"]);
-  await expectNoForbiddenText("src/handoff", ["@playwright/test", "../probes", "../reports", "../orchestrator"]);
+test("routing and handoff do not import Playwright, probes, reports, patches, or orchestrator", async () => {
+  await expectNoForbiddenText("src/routing", ["@playwright/test", "../probes", "../reports", "../patches", "../orchestrator"]);
+  await expectNoForbiddenText("src/handoff", ["@playwright/test", "../probes", "../reports", "../patches", "../orchestrator"]);
 });
 
 test("orchestrator contains no DOM probe implementation details", async () => {
@@ -88,12 +92,13 @@ test("every probe directory declares its local types and probe implementation", 
 });
 
 test("visual proof stage graph exposes progressive requires and produces metadata", () => {
-  expect(VISUAL_PROOF_STAGES.length).toBeGreaterThanOrEqual(12);
+  expect(VISUAL_PROOF_STAGES.length).toBeGreaterThanOrEqual(13);
   expect(VISUAL_PROOF_STAGES.map((stage) => stage.name)).toEqual(expect.arrayContaining([
     "taste-handoff",
     "taste-compliance",
     "aesthetic-diagnosis",
     "enhancement-plan",
+    "safe-patch",
     "impeccable-handoff"
   ]));
   for (const stage of VISUAL_PROOF_STAGES) {

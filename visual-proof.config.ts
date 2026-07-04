@@ -1,5 +1,7 @@
 import type { VisualProofConfig } from "./src/index";
 
+const patchMode = process.env.VISUAL_PROOF_PATCH_MODE === "safe-patch" || process.env.VISUAL_PROOF_ALLOW_PATCH === "true";
+
 const config: VisualProofConfig = {
   baseUrl: process.env.VISUAL_PROOF_BASE_URL ?? "http://127.0.0.1:3000",
   defaultWaitUntil: "networkidle",
@@ -7,6 +9,15 @@ const config: VisualProofConfig = {
   supportsReducedMotion: true,
   allowHorizontalScrollSelectors: ["[data-vp-allow-horizontal-scroll]", ".marquee", ".carousel"],
   allowClippingSelectors: ["[data-vp-allow-clipping]", ".decorative-clip", ".background-orb"],
+  safePatch: {
+    mode: patchMode ? "safe-patch" : "diagnose-only",
+    sourceRoot: process.env.VISUAL_PROOF_SOURCE_ROOT,
+    allowAutoPatch: process.env.VISUAL_PROOF_ALLOW_PATCH === "true",
+    dryRun: process.env.VISUAL_PROOF_PATCH_DRY_RUN !== "false",
+    maxPatchesPerRun: Number(process.env.VISUAL_PROOF_MAX_PATCHES ?? 3),
+    allowedExtensions: [".css", ".html", ".jsx", ".tsx", ".ts", ".md"],
+    operations: []
+  },
   tasteIntent: {
     designRead: "Reading this as: a premium landing page that needs screenshot-backed visual proof before Impeccable polish.",
     pageKind: "Landing",

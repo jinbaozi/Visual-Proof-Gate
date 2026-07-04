@@ -4,6 +4,8 @@ export type ContextKey =
   | "tasteComplianceFindings"
   | "visualScorecard"
   | "enhancementPlan"
+  | "safePatchPlan"
+  | "safePatchLog"
   | "impeccableHandoff"
   | "intentLock"
   | "evidence"
