@@ -5,6 +5,7 @@ import type { TasteComplianceFinding, TasteHandoff } from "./taste-handoff";
 import type { EnhancementPlan, ImpeccableHandoff, VisualScorecard } from "./enhancement";
 import type { SafePatchLog, SafePatchPlan } from "./safe-patch";
 import type { VisualDeltaReport } from "./visual-delta";
+import type { ImpeccableCommandSequence, ImpeccableContextSeed, ImpeccablePreflightChecklist } from "./impeccable";
 
 export interface ImpeccableRoutePlan {
   status: "PASS" | "FAIL";
@@ -22,6 +23,9 @@ export interface VisualProofDataContext {
   safePatchLog?: SafePatchLog;
   visualDelta?: VisualDeltaReport;
   impeccableHandoff?: ImpeccableHandoff;
+  impeccableContextSeed?: ImpeccableContextSeed;
+  impeccableCommandSequence?: ImpeccableCommandSequence;
+  impeccablePreflight?: ImpeccablePreflightChecklist;
   intentLock?: string;
   evidence: EvidenceItem[];
   responsiveObservations: ResponsiveObservation[];
