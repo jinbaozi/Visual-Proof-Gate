@@ -1,11 +1,21 @@
 import { test, expect } from "@playwright/test";
 import {
   applyStress,
+  buildEnhancementPlan,
+  buildImpeccableHandoff,
+  buildImpeccableRoutePlan,
+  buildTasteComplianceFindings,
+  buildTasteHandoffFromConfig,
+  buildVisualScorecard,
   collectAssets,
   collectTokens,
   designIntentMarkdown,
   detectLayoutDefects,
   loadConfig,
+  renderAestheticDiagnosis,
+  renderEnhancementPlanReport,
+  renderImpeccableHandoffReport,
+  renderTasteHandoffLock,
   responsiveMatrixMarkdown,
   routingMarkdown,
   screenshotEvidence,
@@ -27,6 +37,15 @@ test("builds a design intent lock", async () => {
   expect(markdown).toContain("DESIGN_VARIANCE");
   expect(markdown).toContain("MOTION_INTENSITY");
   expect(markdown).toContain("VISUAL_DENSITY");
+});
+
+test("builds a Taste handoff lock", async () => {
+  const config = await loadConfig();
+  const handoff = buildTasteHandoffFromConfig(config);
+  const markdown = renderTasteHandoffLock(handoff);
+  expect(markdown).toContain("# Taste Handoff Lock");
+  expect(markdown).toContain("Anti-slop Rules");
+  expect(handoff.dials.designVariance).toBe(config.tasteIntent.designVariance);
 });
 
 test("defines required viewport matrix", () => {
@@ -99,4 +118,18 @@ test("routes defects to Impeccable commands", () => {
   const markdown = routingMarkdown(defects);
   expect(markdown).toContain("/impeccable adapt home");
   expect(markdown).toContain("/impeccable polish home");
+});
+
+test("builds visual scorecard, enhancement plan, and Impeccable handoff", async () => {
+  const config = await loadConfig();
+  const handoff = buildTasteHandoffFromConfig(config);
+  const defects: VisualDefect[] = [];
+  const findings = buildTasteComplianceFindings({ handoff, defects, assetRows: [], tokenLedgerExists: true });
+  const scorecard = buildVisualScorecard({ defects, tasteFindings: findings, assetRows: [], stateRows: [], tokenLedgerExists: true });
+  const plan = buildEnhancementPlan({ routeName: "home", defects, tasteFindings: findings, scorecard });
+  const routePlan = buildImpeccableRoutePlan(defects);
+  const handoffPack = buildImpeccableHandoff({ handoff, scorecard, enhancementPlan: plan, routePlan, defects });
+  expect(renderAestheticDiagnosis({ scorecard, tasteFindings: findings })).toContain("# Aesthetic Diagnosis");
+  expect(renderEnhancementPlanReport(plan)).toContain("# Enhancement Plan");
+  expect(renderImpeccableHandoffReport(handoffPack)).toContain("# Impeccable Handoff");
 });
