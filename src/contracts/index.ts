@@ -8,4 +8,5 @@ export * from "./taste-handoff";
 export * from "./enhancement";
 export * from "./safe-patch";
 export * from "./visual-delta";
+export * from "./impeccable";
 export * from "./context";
