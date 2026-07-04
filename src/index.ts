@@ -7,6 +7,7 @@ export * from "./browser";
 export * from "./probes";
 export * from "./diagnosis";
 export * from "./enhancers";
+export * from "./patches";
 export * from "./reports";
 export * from "./routing";
 export * from "./handoff";
