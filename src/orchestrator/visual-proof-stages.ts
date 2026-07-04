@@ -2,11 +2,27 @@ import type { ThemeMode, VisualProofStage } from "../contracts";
 import { VIEWPORTS } from "../contracts";
 import { gotoVisualProofRoute, applyVisualMedia, captureScreenshotEvidence } from "../browser";
 import { buildDesignIntentLock } from "../intent";
+import { buildTasteComplianceFindings, buildTasteHandoffFromConfig, renderTasteHandoffLock } from "../taste";
+import { buildVisualScorecard, renderAestheticDiagnosis } from "../diagnosis";
+import { buildEnhancementPlan } from "../enhancers";
+import { buildImpeccableHandoff, renderImpeccableHandoffReport } from "../handoff";
 import { cleanDir, writeJson, writeMarkdown } from "../io";
 import { runLayoutProbe, runResponsiveProbe, runContentStressProbe, runAssetProbe, runTokenProbe, runStateProbe } from "../probes";
 import { buildImpeccableRoutePlan, renderImpeccableRoutingMarkdown } from "../routing";
-import { renderAssetLedgerReport, renderContentStressReport, renderDefectBacklogReport, renderEvidenceReport, renderResponsiveMatrixReport, renderStateMatrixReport } from "../reports";
+import { renderAssetLedgerReport, renderContentStressReport, renderDefectBacklogReport, renderEvidenceReport, renderEnhancementPlanReport, renderResponsiveMatrixReport, renderStateMatrixReport, renderTasteComplianceReport } from "../reports";
 import type { VisualProofRuntimeContext } from "./visual-proof-context";
+
+export const tasteHandoffStage: VisualProofStage<VisualProofRuntimeContext> = {
+  name: "taste-handoff",
+  description: "Builds the Taste handoff contract that bridges Taste Skill output into Visual Proof.",
+  requires: ["config"],
+  produces: ["tasteHandoff", "reports"],
+  async run(context) {
+    context.tasteHandoff = buildTasteHandoffFromConfig(context.config);
+    context.reports["taste-handoff.lock.md"] = renderTasteHandoffLock(context.tasteHandoff);
+    return context;
+  }
+};
 
 export const designIntentStage: VisualProofStage<VisualProofRuntimeContext> = {
   name: "design-intent",
@@ -166,6 +182,63 @@ export const stateMatrixStage: VisualProofStage<VisualProofRuntimeContext> = {
   }
 };
 
+export const tasteComplianceStage: VisualProofStage<VisualProofRuntimeContext> = {
+  name: "taste-compliance",
+  description: "Checks deterministic alignment between Taste intent, evidence, assets, tokens, and blocking defects.",
+  requires: ["tasteHandoff", "assetLedger", "defects"],
+  produces: ["tasteComplianceFindings", "reports"],
+  async run(context) {
+    if (!context.tasteHandoff) throw new Error("taste-compliance requires tasteHandoff");
+    context.tasteComplianceFindings = buildTasteComplianceFindings({
+      handoff: context.tasteHandoff,
+      defects: context.defects,
+      assetRows: context.assetLedger,
+      tokenLedgerExists: Boolean(context.tokenLedger)
+    });
+    context.reports["taste-compliance-report.md"] = renderTasteComplianceReport(context.tasteComplianceFindings);
+    return context;
+  }
+};
+
+export const aestheticDiagnosisStage: VisualProofStage<VisualProofRuntimeContext> = {
+  name: "aesthetic-diagnosis",
+  description: "Converts proof outputs into a deterministic visual scorecard and diagnosis report.",
+  requires: ["tasteComplianceFindings", "assetLedger", "stateMatrix", "defects"],
+  produces: ["visualScorecard", "reports"],
+  async run(context) {
+    context.visualScorecard = buildVisualScorecard({
+      defects: context.defects,
+      tasteFindings: context.tasteComplianceFindings,
+      assetRows: context.assetLedger,
+      stateRows: context.stateMatrix,
+      tokenLedgerExists: Boolean(context.tokenLedger)
+    });
+    context.reports["aesthetic-diagnosis.md"] = renderAestheticDiagnosis({
+      scorecard: context.visualScorecard,
+      tasteFindings: context.tasteComplianceFindings
+    });
+    return context;
+  }
+};
+
+export const enhancementPlanStage: VisualProofStage<VisualProofRuntimeContext> = {
+  name: "enhancement-plan",
+  description: "Generates diagnose-only visual enhancement candidates before Impeccable systemization.",
+  requires: ["visualScorecard", "tasteComplianceFindings", "defects"],
+  produces: ["enhancementPlan", "reports"],
+  async run(context) {
+    if (!context.visualScorecard) throw new Error("enhancement-plan requires visualScorecard");
+    context.enhancementPlan = buildEnhancementPlan({
+      routeName: context.config.routes[0]?.name ?? "route",
+      defects: context.defects,
+      tasteFindings: context.tasteComplianceFindings,
+      scorecard: context.visualScorecard
+    });
+    context.reports["enhancement-plan.md"] = renderEnhancementPlanReport(context.enhancementPlan);
+    return context;
+  }
+};
+
 export const routingStage: VisualProofStage<VisualProofRuntimeContext> = {
   name: "impeccable-routing",
   description: "Converts defects into an ordered Impeccable command route plan.",
@@ -178,10 +251,31 @@ export const routingStage: VisualProofStage<VisualProofRuntimeContext> = {
   }
 };
 
+export const impeccableHandoffStage: VisualProofStage<VisualProofRuntimeContext> = {
+  name: "impeccable-handoff",
+  description: "Builds a final handoff pack for Impeccable setup, targeted fixes, audit, and polish.",
+  requires: ["tasteHandoff", "visualScorecard", "enhancementPlan", "routing", "defects"],
+  produces: ["impeccableHandoff", "reports"],
+  async run(context) {
+    if (!context.tasteHandoff || !context.visualScorecard || !context.enhancementPlan || !context.routing) {
+      throw new Error("impeccable-handoff requires tasteHandoff, visualScorecard, enhancementPlan, and routing");
+    }
+    context.impeccableHandoff = buildImpeccableHandoff({
+      handoff: context.tasteHandoff,
+      scorecard: context.visualScorecard,
+      enhancementPlan: context.enhancementPlan,
+      routePlan: context.routing,
+      defects: context.defects
+    });
+    context.reports["impeccable-handoff.md"] = renderImpeccableHandoffReport(context.impeccableHandoff);
+    return context;
+  }
+};
+
 export const reportWritingStage: VisualProofStage<VisualProofRuntimeContext> = {
   name: "report-writing",
   description: "Renders and writes all Visual Proof Gate reports after probes complete.",
-  requires: ["intentLock", "evidence", "responsiveObservations", "assetLedger", "stateMatrix", "defects", "reports"],
+  requires: ["intentLock", "tasteHandoff", "evidence", "responsiveObservations", "assetLedger", "stateMatrix", "defects", "reports"],
   produces: ["reports"],
   async run(context) {
     context.reports["evidence.md"] = renderEvidenceReport(context.evidence);
@@ -191,20 +285,28 @@ export const reportWritingStage: VisualProofStage<VisualProofRuntimeContext> = {
     context.reports["state-matrix.md"] = renderStateMatrixReport(context.stateMatrix);
     context.reports["defect-backlog.md"] = renderDefectBacklogReport(context.defects);
 
+    await writeMarkdown("docs/visual-proof/taste-handoff.lock.md", context.reports["taste-handoff.lock.md"] ?? "");
     await writeMarkdown("docs/visual-proof/design-intent.lock.md", context.intentLock ?? "");
     await writeMarkdown("docs/visual-proof/evidence.md", context.reports["evidence.md"]);
+    await writeMarkdown("docs/visual-proof/taste-compliance-report.md", context.reports["taste-compliance-report.md"] ?? "");
+    await writeMarkdown("docs/visual-proof/aesthetic-diagnosis.md", context.reports["aesthetic-diagnosis.md"] ?? "");
+    await writeJson("docs/visual-proof/visual-scorecard.json", context.visualScorecard ?? {});
+    await writeMarkdown("docs/visual-proof/enhancement-plan.md", context.reports["enhancement-plan.md"] ?? "");
+    await writeJson("docs/visual-proof/enhancement-plan.json", context.enhancementPlan ?? {});
     await writeMarkdown("docs/visual-proof/responsive-matrix.md", context.reports["responsive-matrix.md"]);
     await writeMarkdown("docs/visual-proof/content-stress-report.md", context.reports["content-stress-report.md"]);
     await writeMarkdown("docs/visual-proof/asset-ledger.md", context.reports["asset-ledger.md"]);
     await writeJson("docs/visual-proof/token-ledger.json", context.tokenLedger ?? {});
     await writeMarkdown("docs/visual-proof/state-matrix.md", context.reports["state-matrix.md"]);
     await writeMarkdown("docs/visual-proof/defect-backlog.md", context.reports["defect-backlog.md"]);
+    await writeMarkdown("docs/visual-proof/impeccable-handoff.md", context.reports["impeccable-handoff.md"] ?? "");
     await writeMarkdown("docs/visual-proof/impeccable-routing.md", context.reports["impeccable-routing.md"] ?? "");
     return context;
   }
 };
 
 export const VISUAL_PROOF_STAGES = [
+  tasteHandoffStage,
   designIntentStage,
   screenshotEvidenceStage,
   responsiveProbeStage,
@@ -213,7 +315,11 @@ export const VISUAL_PROOF_STAGES = [
   assetLedgerStage,
   tokenLedgerStage,
   stateMatrixStage,
+  tasteComplianceStage,
+  aestheticDiagnosisStage,
+  enhancementPlanStage,
   routingStage,
+  impeccableHandoffStage,
   reportWritingStage
 ] satisfies VisualProofStage<VisualProofRuntimeContext>[];
 
