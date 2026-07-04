@@ -9,14 +9,21 @@ test("runs full visual proof gate", async ({ page, browserName }) => {
   const config = await loadConfig();
   const defects = await runVisualProofGate(page, config);
   for (const report of [
+    "docs/visual-proof/taste-handoff.lock.md",
     "docs/visual-proof/design-intent.lock.md",
     "docs/visual-proof/evidence.md",
+    "docs/visual-proof/taste-compliance-report.md",
+    "docs/visual-proof/aesthetic-diagnosis.md",
+    "docs/visual-proof/visual-scorecard.json",
+    "docs/visual-proof/enhancement-plan.md",
+    "docs/visual-proof/enhancement-plan.json",
     "docs/visual-proof/responsive-matrix.md",
     "docs/visual-proof/token-ledger.json",
     "docs/visual-proof/asset-ledger.md",
     "docs/visual-proof/state-matrix.md",
     "docs/visual-proof/content-stress-report.md",
     "docs/visual-proof/defect-backlog.md",
+    "docs/visual-proof/impeccable-handoff.md",
     "docs/visual-proof/impeccable-routing.md"
   ]) await fs.access(report);
   const p0 = defects.filter((d) => d.severity === "P0");
