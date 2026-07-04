@@ -8,7 +8,7 @@ Visual Proof Gate is structured so an agent can read only the layer needed for t
 Taste Skill
   ↓ first visual pass + design intent
 Visual Proof Gate
-  ↓ evidence + diagnosis + enhancement plan + optional safe patch + Impeccable handoff
+  ↓ evidence + diagnosis + enhancement plan + optional safe patch + visual delta + Impeccable handoff
 Impeccable Skill
   ↓ design systemization + audit + correction + polish + shipping checks
 ```
@@ -22,9 +22,10 @@ Impeccable Skill
 5. **Capabilities**: `src/probes/` contains isolated DOM/browser probes. A probe collects observations and defects; it does not render reports.
 6. **Diagnosis and enhancement**: `src/diagnosis/` turns proof outputs into a visual scorecard; `src/enhancers/` generates diagnose-only enhancement candidates.
 7. **Safe patches**: `src/patches/` builds and optionally applies explicitly configured low-risk source edits. It is disabled by default.
-8. **Reports, routing, and handoff**: `src/reports/` renders Markdown/JSON content; `src/routing/` maps defects to Impeccable commands; `src/handoff/` prepares Impeccable handoff context.
-9. **Orchestration**: `src/orchestrator/` composes explicit stages. It does not contain DOM probe internals.
-10. **Architecture guardrails**: `tests/architecture/` enforces dependency boundaries in CI.
+8. **Visual delta**: `src/delta/` links before and after evidence into reports without enforcing pixel thresholds in v1.
+9. **Reports, routing, and handoff**: `src/reports/` renders Markdown/JSON content; `src/routing/` maps defects to Impeccable commands; `src/handoff/` prepares Impeccable handoff context.
+10. **Orchestration**: `src/orchestrator/` composes explicit stages. It does not contain DOM probe internals.
+11. **Architecture guardrails**: `tests/architecture/` enforces dependency boundaries in CI.
 
 ## Dependency direction
 
@@ -41,9 +42,11 @@ diagnosis + enhancers
   ↓
 patches
   ↓
+delta
+  ↓
 reports + routing + handoff
   ↓
 orchestrator
 ```
 
-The practical rule is simple: lower layers can be read without opening higher layers. Higher layers compose lower layers but do not hide probe, diagnosis, enhancement, patch, report, or handoff logic inside the orchestrator.
+The practical rule is simple: lower layers can be read without opening higher layers. Higher layers compose lower layers but do not hide probe, diagnosis, enhancement, patch, delta, report, or handoff logic inside the orchestrator.
