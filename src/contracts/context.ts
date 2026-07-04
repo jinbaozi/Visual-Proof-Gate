@@ -4,6 +4,7 @@ import type { VisualProofConfig } from "./config";
 import type { TasteComplianceFinding, TasteHandoff } from "./taste-handoff";
 import type { EnhancementPlan, ImpeccableHandoff, VisualScorecard } from "./enhancement";
 import type { SafePatchLog, SafePatchPlan } from "./safe-patch";
+import type { VisualDeltaReport } from "./visual-delta";
 
 export interface ImpeccableRoutePlan {
   status: "PASS" | "FAIL";
@@ -19,6 +20,7 @@ export interface VisualProofDataContext {
   enhancementPlan?: EnhancementPlan;
   safePatchPlan?: SafePatchPlan;
   safePatchLog?: SafePatchLog;
+  visualDelta?: VisualDeltaReport;
   impeccableHandoff?: ImpeccableHandoff;
   intentLock?: string;
   evidence: EvidenceItem[];

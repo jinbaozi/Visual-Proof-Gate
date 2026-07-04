@@ -15,6 +15,9 @@ Required outputs:
 - `patch-plan.md`
 - `patch-plan.json`
 - `patch-log.md`
+- `before-after-gallery.md`
+- `visual-delta-report.md`
+- `visual-delta.json`
 - `responsive-matrix.md`
 - `token-ledger.json`
 - `asset-ledger.md`
@@ -24,6 +27,6 @@ Required outputs:
 - `impeccable-handoff.md`
 - `impeccable-routing.md`
 
-The `screenshots/` directory stores viewport, theme, and state evidence.
+The `screenshots/` directory stores viewport, theme, and state evidence. The `screenshots/after/` directory stores sampled after-state screenshots for Visual Delta reports.
 
-Visual Proof defaults to diagnose-only. Safe Patch Mode produces a patch plan and log on every gate run, but it only modifies source files when explicitly configured with `mode: safe-patch`, `allowAutoPatch: true`, and `sourceRoot`.
+Visual Proof defaults to diagnose-only. Safe Patch Mode produces a patch plan and log on every gate run, but it only modifies source files when explicitly configured with `mode: safe-patch`, `allowAutoPatch: true`, and `sourceRoot`. Visual Delta v1 is evidence-oriented and does not enforce pixel-level thresholds.
